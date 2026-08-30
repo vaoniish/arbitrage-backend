@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Crypto Arbitrage Scanner</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Tailwind CSS & Icons -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between p-4 pb-24">
+
+    <!-- 1. ВЕРХНЯЯ ШАПКА И СТАУС ПАРАМЕТРОВ -->
+    <div>
+        <div class="flex justify-between items-center mb-4">
+            <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider">Live Scanner</span>
+            </div>
+            <div class="text-xs text-slate-400 bg-slate-800/80 px-2.5 py-1 rounded-full border border-slate-700/50">
+                Депозит: <span class="text-sky-400 font-bold">$300</span>
+            </div>
+        </div>
+
+        <!-- 2. ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМОВ (СВИЧЕР) -->
+        <div class="bg-slate-800/60 p-1 rounded-xl flex border border-slate-700/50 mb-5">
+            <button id="btn-inter" onclick="switchTab('inter')" class="flex-1 py-2 text-xs font-semibold rounded-lg bg-sky-500 text-white transition-all duration-200">
+                <i class="bi bi-arrow-left-right mr-1"></i> Межбиржевой
+            </button>
+            <button id="btn-intra" onclick="switchTab('intra')" class="flex-1 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition-all duration-200">
+                <i class="bi bi-triangle mr-1"></i> Внутрибиржевой
+            </button>
+        </div>
+
+        <!-- 3. КАРТОЧКА ФИЛЬТРОВ И НАСТРОЕК -->
+        <div class="bg-slate-800/40 rounded-2xl p-3.5 border border-slate-700/40 mb-5 space-y-3">
+            <div class="flex justify-between items-center text-xs text-slate-400">
+                <span>Мин. профит: <b class="text-slate-200">+0.3%</b></span>
+                <span>Комиссии: <b class="text-emerald-400">Учтены</b></span>
+            </div>
+        </div>
+
+        <!-- 4. СПИСОК НАЙДЕННЫХ СВЯЗОК -->
+        <div class="space-y-3" id="deals-list">
+            
+            <!-- Карточка связки #1 -->
+            <div class="bg-slate-800/80 rounded-2xl p-4 border border-slate-700/60 shadow-lg relative overflow-hidden">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold text-xs">
+                            NEAR
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm">NEAR/USDT</div>
+                            <div class="text-[10px] text-slate-400">Сеть: NEAR Protocol</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-emerald-400 font-extrabold text-base">+$1.85</div>
+                        <div class="text-[10px] text-emerald-500 font-semibold bg-emerald-500/10 px-1.5 py-0.5 rounded-md inline-block">+0.62% чистый</div>
+                    </div>
+                </div>
+
+                <!-- Детали маршрута -->
+                <div class="bg-slate-900/60 rounded-xl p-2.5 grid grid-cols-2 gap-2 text-xs border border-slate-800">
+                    <div>
+                        <span class="text-[10px] text-slate-500 block uppercase">Купить</span>
+                        <span class="font-semibold text-slate-200">HTX</span>
+                        <span class="text-slate-400 text-[11px] block">$1.8489</span>
+                    </div>
+                    <div class="border-l border-slate-800 pl-2.5">
+                        <span class="text-[10px] text-slate-500 block uppercase">Продать</span>
+                        <span class="font-semibold text-slate-200">Bybit</span>
+                        <span class="text-slate-400 text-[11px] block">$1.8610</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Карточка связки #2 -->
+            <div class="bg-slate-800/80 rounded-2xl p-4 border border-slate-700/60 shadow-lg relative overflow-hidden">
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-xs">
+                            SOL
+                        </div>
+                        <div>
+                            <div class="font-bold text-sm">SOL/USDT</div>
+                            <div class="text-[10px] text-slate-400">Сеть: Solana</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-emerald-400 font-extrabold text-base">+$2.40</div>
+                        <div class="text-[10px] text-emerald-500 font-semibold bg-emerald-500/10 px-1.5 py-0.5 rounded-md inline-block">+0.80% чистый</div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/60 rounded-xl p-2.5 grid grid-cols-2 gap-2 text-xs border border-slate-800">
+                    <div>
+                        <span class="text-[10px] text-slate-500 block uppercase">Купить</span>
+                        <span class="font-semibold text-slate-200">Gate.io</span>
+                        <span class="text-slate-400 text-[11px] block">$142.10</span>
+                    </div>
+                    <div class="border-l border-slate-800 pl-2.5">
+                        <span class="text-[10px] text-slate-500 block uppercase">Продать</span>
+                        <span class="font-semibold text-slate-200">OKX</span>
+                        <span class="text-slate-400 text-[11px] block">$143.25</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 5. НИЖНЯЯ НАВИГАЦИОННАЯ ПАНЕЛЬ (BOTTOM BAR) -->
+    <div class="fixed bottom-3 left-4 right-4 bg-slate-900/90 backdrop-blur-md rounded-2xl p-2 flex justify-around items-center border border-slate-800 shadow-2xl z-50">
+        <button class="flex flex-col items-center text-sky-400 text-[10px] font-medium gap-0.5">
+            <i class="bi bi-lightning-charge-fill text-lg"></i> Связки
+        </button>
+        <button class="flex flex-col items-center text-slate-400 hover:text-slate-200 text-[10px] font-medium gap-0.5">
+            <i class="bi bi-funnel text-lg"></i> Фильтры
+        </button>
+        <button class="flex flex-col items-center text-slate-400 hover:text-slate-200 text-[10px] font-medium gap-0.5">
+            <i class="bi bi-sliders text-lg"></i> Депозит
+        </button>
+        <button class="flex flex-col items-center text-slate-400 hover:text-slate-200 text-[10px] font-medium gap-0.5">
+            <i class="bi bi-person-circle text-lg"></i> Профиль
+        </button>
+    </div>
+
+    <!-- SKD ИНИЦИАЛИЗАЦИЯ -->
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.setHeaderColor('#0f172a');
+        tg.setBackgroundColor('#0f172a');
+
+        function switchTab(type) {
+            const btnInter = document.getElementById('btn-inter');
+            const btnIntra = document.getElementById('btn-intra');
+            
+            if(type === 'inter') {
+                btnInter.className = "flex-1 py-2 text-xs font-semibold rounded-lg bg-sky-500 text-white transition-all duration-200";
+                btnIntra.className = "flex-1 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition-all duration-200";
+            } else {
+                btnIntra.className = "flex-1 py-2 text-xs font-semibold rounded-lg bg-sky-500 text-white transition-all duration-200";
+                btnInter.className = "flex-1 py-2 text-xs font-semibold rounded-lg text-slate-400 hover:text-white transition-all duration-200";
+            }
+        }
+    </script>
+</body>
+</html>
